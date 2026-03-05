@@ -19,6 +19,9 @@ if(storedMissions){
 	missionList.push(storedMissions);
 }
 
+//Player data storage
+
+
 //Add mission to array
 missionCreateBtn.addEventListener("click",function (){
 	const mission = {
@@ -90,7 +93,6 @@ function renderMissionTable (data) {
 		row.appendChild(actionCell);	
 		tableBody.appendChild(row);
 		}
-		
 	});
 }
 
@@ -102,6 +104,7 @@ function missionStart (mission) {	//THINK OF FORMULA
 //get difficulty, duration, event and enemyLevel and apply buff or debuff
 	let EnLvl = 0;
 	let EnQty = 0;
+	let event = 0;
 	switch(mission.enemyLevel){
 		case "Untrained": EnLvl = -5;
 			break;
@@ -118,7 +121,15 @@ function missionStart (mission) {	//THINK OF FORMULA
 		case "Excesive": EnQty = 12;
 			break;
 	}
-	let succesChance = (((100 - mission.level) - EnLvl) - (EnQty/2));
+	switch(mission.event){
+		case "rain": event = 5;
+			break;
+		case "debris" : event = 8;
+			break;
+		case "nothing" : event = 0;
+			break;
+	}
+	let succesChance = ((((100 - mission.level) - EnLvl) - (EnQty/2)) - event);
 	let succesRoll = CreateRandomNumber(1, 100);
 	if(succesChance <= succesRoll){
 		//Create item chance discovery 
@@ -127,18 +138,19 @@ function missionStart (mission) {	//THINK OF FORMULA
 		renderMissionTable(missionList);
 		return true;
 	}else{
-		return false;
+		DealDmgPlayer(mission.level)
 		//player recieve dmg
+		return false;
 	}
 
 }
 
-function CreateRandomNumber(max, min) {
+function CreateRandomNumber(min, max) {
 	return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 function DecideEvent(){
-	let rNumber = CreateRandomNumber(20, 1);
+	let rNumber = CreateRandomNumber(1, 20);
 	switch(rNumber){
 		case 1: return "rain";
 			break;
@@ -147,4 +159,8 @@ function DecideEvent(){
 		default: return "nothing";
 			break;
 	}
+}
+
+function DealDmgPlayer(missionLevel){
+	//return (CreateRandomNumber(1,missionLevel) + (playerLevel)/2);
 }
