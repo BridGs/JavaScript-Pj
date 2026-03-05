@@ -26,11 +26,11 @@ missionCreateBtn.addEventListener("click",function (){
 		title: missionTitle,
 		difficulty: difficulty,
 		level: missionLevel,
-		state: "unfinished"
-		//event:
-		//duration:
-		//enemyQuantity:
-		//enemyLevel:
+		state: "unfinished",
+		event: DecideEvent(),
+		duration: duration,
+		enemyQuantity: enemyQuantity,
+		enemyLevel: enemyLevel
 	};
 
 	missionList.push(mission);
@@ -58,6 +58,14 @@ function renderMissionTable (data) {
 		difficultyCell.textContent = mission.difficulty;
 		const levelCell = document.createElement("td");
 		levelCell.textContent = mission.level;
+		const eventCell = document.createElement("td");
+		eventCell.textContent = mission.event; 
+		const durationCell = document.createElement("td");
+		durationCell.textContent = mission.duration;
+		const enemyQuantityCell = document.createElement("td");
+		enemyQuantityCell.textContent = mission.enemyQuantity;
+		const enemyLevelCell = document.createElement("td");
+		enemyLevelCell.textContent = mission.enemyLevel;
 
 		const actionCell = document.createElement("td");
 		const acceptBtn = document.createElement("button");
@@ -75,6 +83,10 @@ function renderMissionTable (data) {
 		row.appendChild(missionCell);
 		row.appendChild(difficultyCell);
 		row.appendChild(levelCell);
+		row.appendChild(eventCell);
+		row.appendChild(durationCell);
+		row.appendChild(enemyQuantityCell);
+		row.appendChild(enemyLevelCell);
 		row.appendChild(actionCell);	
 		tableBody.appendChild(row);
 		}
@@ -84,9 +96,55 @@ function renderMissionTable (data) {
 
 renderMissionTable(missionList);
 
-function missionStart (/*gets mission data AND player data */) {	//THINK OF FORMULA 
+function missionStart (mission) {	//THINK OF FORMULA 
 //compares player lvl and mission lvl, player overlevel = higher win%						--can be underlevel, lower win%
 //compares player ammoCount to mission.enemyQuantity, if ammoCount higher = higher win%		--can be low ammo
 //get difficulty, duration, event and enemyLevel and apply buff or debuff
+	let EnLvl = 0;
+	let EnQty = 0;
+	switch(mission.enemyLevel){
+		case "Untrained": EnLvl = -5;
+			break;
+		case "Trained": EnLvl = 2;
+			break;
+		case "Veteran": EnLvl = 10;
+			break;
+	}
+	switch(mission.enemyQuantity){
+		case "Low": EnQty = -12;
+			break;
+		case "Normal": EnQty = 6;
+			break;
+		case "Excesive": EnQty = 12;
+			break;
+	}
+	let succesChance = (((100 - mission.level) - EnLvl) - (EnQty/2));
+	let succesRoll = CreateRandomNumber(1, 100);
+	if(succesChance <= succesRoll){
+		//Create item chance discovery 
+		mission.state = "finished";
+		localStorage.setItem("missionList", JSON.stringify(missionList));
+		renderMissionTable(missionList);
+		return true;
+	}else{
+		return false;
+		//player recieve dmg
+	}
 
+}
+
+function CreateRandomNumber(max, min) {
+	return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function DecideEvent(){
+	let rNumber = CreateRandomNumber(20, 1);
+	switch(rNumber){
+		case 1: return "rain";
+			break;
+		case 2: return "debris";
+			break;
+		default: return "nothing";
+			break;
+	}
 }
