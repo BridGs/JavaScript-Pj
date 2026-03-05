@@ -21,6 +21,16 @@ if(storedMissions){
 
 //Player data storage
 
+let Player = {
+	playerXp : 0,
+	playerDmg : 0,
+	playerVitality : 1,
+	playerHp : ((10 + (playerVitality * 3)) - playerDmg),
+	playerAgility : 1,
+	playerLuck : 1,
+	playerAmmoQuantity : "Low"
+}
+
 
 //Add mission to array
 missionCreateBtn.addEventListener("click",function (){
@@ -33,7 +43,8 @@ missionCreateBtn.addEventListener("click",function (){
 		event: DecideEvent(),
 		duration: duration,
 		enemyQuantity: enemyQuantity,
-		enemyLevel: enemyLevel
+		enemyLevel: enemyLevel,
+		xp : AssignXp(missionLevel, difficulty)
 	};
 
 	missionList.push(mission);
@@ -134,15 +145,28 @@ function missionStart (mission) {	//THINK OF FORMULA
 	if(succesChance <= succesRoll){
 		//Create item chance discovery 
 		mission.state = "finished";
+		Player.playerXp += mission.xp;
 		localStorage.setItem("missionList", JSON.stringify(missionList));
 		renderMissionTable(missionList);
 		return true;
 	}else{
 		DealDmgPlayer(mission.level)
+		Player.playerXp += (mission.xp / 2);
 		//player recieve dmg
 		return false;
 	}
 
+}
+
+function AssignXp(level, difficulty){
+	switch(difficulty){
+		case "Easy": return level * 2;
+			break;
+		case "Normal": return level * 5; 
+			break;
+		case "Hard": return level * 10;
+			break;
+	}   
 }
 
 function CreateRandomNumber(min, max) {
