@@ -4,7 +4,7 @@ const missionTitle = document.getElementById("missionTitle");
 const difficulty = document.getElementById("difficulty");
 const missionLevel = document.getElementById("level");
 //retrieving stored missionList
-const storedMissions = localStorage.getItem("missionList");
+let storedMissions = localStorage.getItem("missionList");
 
 let missionList = [];
 const missionLoader = {
@@ -27,6 +27,10 @@ missionCreateBtn.addEventListener("click",function (){
 		difficulty: difficulty,
 		level: missionLevel,
 		state: "unfinished"
+		//event:
+		//duration:
+		//enemyQuantity:
+		//enemyLevel:
 	};
 
 	missionList.push(mission);
@@ -43,9 +47,10 @@ function renderMissionTable (data) {
 	console.log(data);
 	tableBody.innerHTML = "";
 
-	data.forEach(mission => {
+	data.forEach((mission, index) => {
 		console.log(mission);
-		const row = document.createElement("tr");
+		if(mission.state = "unfinished"){
+			const row = document.createElement("tr");
 
 		const missionCell = document.createElement("td");
 		missionCell.textContent = mission.title;
@@ -53,12 +58,35 @@ function renderMissionTable (data) {
 		difficultyCell.textContent = mission.difficulty;
 		const levelCell = document.createElement("td");
 		levelCell.textContent = mission.level;
-	
+
+		const actionCell = document.createElement("td");
+		const acceptBtn = document.createElement("button");
+		acceptBtn.textContent = "Accept Mission";
+
+		acceptBtn.addEventListener("click", function (){
+			//Logic of mission succes or failure
+			mission.state = "finished";
+			localStorage.setItem("missionList", JSON.stringify(missionList));
+			renderMissionTable(missionList);
+		});
+
+		actionCell.appendChild(acceptBtn);
+
 		row.appendChild(missionCell);
 		row.appendChild(difficultyCell);
 		row.appendChild(levelCell);
+		row.appendChild(actionCell);	
 		tableBody.appendChild(row);
+		}
+		
 	});
 }
 
 renderMissionTable(missionList);
+
+function missionStart (/*gets mission data AND player data */) {	//THINK OF FORMULA 
+//compares player lvl and mission lvl, player overlevel = higher win%						--can be underlevel, lower win%
+//compares player ammoCount to mission.enemyQuantity, if ammoCount higher = higher win%		--can be low ammo
+//get difficulty, duration, event and enemyLevel and apply buff or debuff
+
+}
