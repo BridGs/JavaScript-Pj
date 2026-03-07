@@ -3,19 +3,29 @@ const missionCreateBtn = document.getElementById("createMissionBtn");
 const missionTitle = document.getElementById("missionTitle");
 const difficulty = document.getElementById("difficulty");
 const missionLevel = document.getElementById("level");
+const duration = document.getElementById("duration");
+const enemyQuantity = document.getElementById("enemyQuantity");
+const enemyLevel = document.getElementById("enemyLevel")
 //retrieving stored missionList
-let storedMissions = localStorage.getItem("missionList");
 
+
+let storedMissions = localStorage.getItem("missionList");
 let missionList = [];
-const missionLoader = {
-	id: 0,
-	title: "loader",
-	difficulty: "1.0",
-	level: "0",
-	state: "finished"
-};
-missionList.push(missionLoader);
+
+//missionList.push(missionLoader);
 if(storedMissions){
+	missionList = JSON.parse(storedMissions);
+}else{
+	missionList = [{
+		id:0,
+		title: "loader",
+		difficulty: "1.0",
+		level: "0",
+		state: "finished"
+	}];
+}
+
+if(storedMissions != missionList){
 	missionList.push(storedMissions);
 }
 
@@ -26,10 +36,18 @@ let Player = {
 	playerLevel : 1,
 	playerDmg : 0,
 	playerVitality : 1,
-	playerHp : ((10 + (playerVitality * 3)) - playerDmg),
+	playerHp : ManagePlayerHP,
 	playerAgility : 1,
 	playerLuck : 1,
 	playerAmmoQuantity : "Low"
+}
+
+function ManagePlayerHP(){
+	if(Player.playerVitality != null){
+		return Math.floor(10 * (Player.playerVitality / 2) - Player.playerDmg);
+	} else{
+		return 10
+	}
 }
 
 
@@ -37,14 +55,14 @@ let Player = {
 missionCreateBtn.addEventListener("click",function (){
 	const mission = {
 		id: (missionList.length),
-		title: missionTitle,
-		difficulty: difficulty,
-		level: missionLevel,
+		title: missionTitle.value,
+		difficulty: difficulty.value,
+		level: missionLevel.value,
 		state: "unfinished",
 		event: DecideEvent(),
-		duration: duration,
-		enemyQuantity: enemyQuantity,
-		enemyLevel: enemyLevel,
+		duration: duration.value,
+		enemyQuantity: enemyQuantity.value,
+		enemyLevel: enemyLevel.value,
 		xp : AssignXp(missionLevel, difficulty)
 	};
 
@@ -59,20 +77,27 @@ missionCreateBtn.addEventListener("click",function (){
 let tableBody = document.getElementById("missionTable")
 //Make table of mission from array
 function renderMissionTable (data) {
-	console.log(data);
+	//console.log(data);
 	tableBody.innerHTML = "";
 
 	data.forEach((mission, index) => {
-		console.log(mission);
-		if(mission.state = "unfinished"){
+		//console.log(mission);
+		if(!mission){
+			return;
+		}
+
+		if(mission.state == "unfinished"){
 			const row = document.createElement("tr");
 
 		const missionCell = document.createElement("td");
 		missionCell.textContent = mission.title;
+		//console.log(mission.title);
 		const difficultyCell = document.createElement("td");
 		difficultyCell.textContent = mission.difficulty;
+		//console.log(mission.difficulty);
 		const levelCell = document.createElement("td");
 		levelCell.textContent = mission.level;
+		//console.log(mission.level);
 		const eventCell = document.createElement("td");
 		eventCell.textContent = mission.event; 
 		const durationCell = document.createElement("td");
@@ -90,11 +115,13 @@ function renderMissionTable (data) {
 
 		acceptBtn.addEventListener("click", function (){
 			//Logic of mission succes or failure
-			MissionAssigmentStart(missionStart);
+			MissionAssigmentStart(mission);
 			renderMissionTable(missionList);
 		});
 
 		actionCell.appendChild(acceptBtn);
+		
+		//console.log(levelCell,eventCell,enemyLevelCell);
 
 		row.appendChild(missionCell);
 		row.appendChild(difficultyCell);
@@ -103,6 +130,7 @@ function renderMissionTable (data) {
 		row.appendChild(durationCell);
 		row.appendChild(enemyQuantityCell);
 		row.appendChild(enemyLevelCell);
+		row.appendChild(missionChanceCell);
 		row.appendChild(actionCell);	
 		tableBody.appendChild(row);
 		}
@@ -146,30 +174,37 @@ function missionStart (mission) {	//THINK OF FORMULA
 	return succesChance;
 }
 
-function MissionAssigmentStart(succesChance) {
+function MissionAssigmentStart(mission) {
+	let succesChance = missionStart(mission);
 	let succesRoll = CreateRandomNumber(1, 100);
-		if(succesChance <= succesRoll){
+	console.log("chance de success",succesChance, "valor sacado", succesRoll);
+		if(succesChance >= succesRoll){
 			//Create item chance discovery 
 			mission.state = "finished";
 			Player.playerXp += mission.xp;
+			console.log(Player.playerXp);
 			localStorage.setItem("missionList", JSON.stringify(missionList));
 		renderMissionTable(missionList);
+		alert("Mission succesfull"); 
 		return true;
 	}else{
 		DealDmgPlayer(mission.level, Player)
 		Player.playerXp += (mission.xp / 2);
+		console.log(Player.playerXp);
+		renderMissionTable(missionList);
 		//player recieve dmg
+		alert("Mission failed");
 		return false;
 	}
 }
 
 function AssignXp(level, difficulty){
 	switch(difficulty){
-		case "Easy": return level * 1;
+		case 1: return level * 1;
 			break;
-		case "Normal": return level * 2; 
+		case 2: return level * 2; 
 			break;
-		case "Hard": return level * 4;
+		case 4: return level * 4;
 			break;
 	}   
 }
@@ -197,11 +232,17 @@ function CreateRandomNumber(min, max) {
 function DecideEvent(){
 	let rNumber = CreateRandomNumber(1, 20);
 	switch(rNumber){
-		case 1: return "rain";
+		case 1: 
+			console.log("rain, 1");
+			return "rain";
 			break;
-		case 2: return "debris";
+		case 2:
+			console.log("debris, 2") 
+			return "debris";
 			break;
-		default: return "nothing";
+		default: 
+			console.log("nothing,else")
+			return "nothing";
 			break;
 	}
 }

@@ -9,15 +9,15 @@
 
 	<h1>Create mission</h1>
 	<input type="text" id="missionTitle" placeholder="Name of mission">
-	<select type="text" id="difficulty">
-		<option >Easy</option>
-		<option >Normal</option>
-		<option >Hard</option>
+	<select type="number" id="difficulty">
+		<option value="1" >Easy</option>
+		<option value="2" >Normal</option>
+		<option value="4" >Hard</option>
 	</select>
 	<select type="text" id="duration">
-		<option >Short</option>
-		<option >Normal</option>
-		<option >Long</option>
+		<option value="Short" >Short</option>
+		<option value="Normal" >Normal</option>
+		<option value="Long" >Long</option>
 	</select>
 	<select type="text" id="enemyQuantity">
 		<option >Low</option>
@@ -39,6 +39,10 @@
 				<th>title</th>
 				<th>difficulty</th>
 				<th>level</th>
+				<th>event</th>
+				<th>duration</th>
+				<th>enemyQuantity</th>
+				<th>enemyTraining</th>
 				<th>action</th>
 			</tr>
 		</thead>
