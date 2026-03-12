@@ -10,9 +10,12 @@ const enemyLevel = document.getElementById("enemyLevel")
 
 
 let storedMissions = localStorage.getItem("missionList");
+let storedPlayer = localStorage.getItem("Player");
 let missionList = [];
+let Player;
+let playerTable = document.getElementById("playerStats");
+//Preload of data
 
-//missionList.push(missionLoader);
 if(storedMissions){
 	missionList = JSON.parse(storedMissions);
 }else{
@@ -28,10 +31,13 @@ if(storedMissions){
 if(storedMissions != missionList){
 	missionList.push(storedMissions);
 }
+console.log(storedPlayer);
 
 //Player data storage
-
-let Player = {
+if(storedPlayer != null){
+	Player = JSON.parse(storedPlayer);
+}else{
+	Player = {
 	playerXp : 0,
 	playerLevel : 1,
 	playerDmg : 0,
@@ -41,10 +47,12 @@ let Player = {
 	playerLuck : 1,
 	playerAmmoQuantity : "Low"
 }
+}
 
-function ManagePlayerHP(){
-	if(Player.playerVitality != null){
-		return Math.floor(10 * (Player.playerVitality / 2) - Player.playerDmg);
+
+function ManagePlayerHP(player){
+	if(player.playerVitality != null){
+		return Math.floor(10 * (player.playerVitality / 2) - player.playerDmg);
 	} else{
 		return 10
 	}
@@ -63,7 +71,7 @@ missionCreateBtn.addEventListener("click",function (){
 		duration: duration.value,
 		enemyQuantity: enemyQuantity.value,
 		enemyLevel: enemyLevel.value,
-		xp : AssignXp(missionLevel, difficulty)
+		xp: AssignXp(missionLevel.value, difficulty.value)
 	};
 
 	missionList.push(mission);
@@ -74,7 +82,7 @@ missionCreateBtn.addEventListener("click",function (){
 	renderMissionTable(missionList);
 });
 
-let tableBody = document.getElementById("missionTable")
+let tableBody = document.getElementById("missionTable");
 //Make table of mission from array
 function renderMissionTable (data) {
 	//console.log(data);
@@ -139,10 +147,7 @@ function renderMissionTable (data) {
 
 renderMissionTable(missionList);
 
-function missionStart (mission) {	//THINK OF FORMULA 
-//compares player lvl and mission lvl, player overlevel = higher win%						--can be underlevel, lower win%
-//compares player ammoCount to mission.enemyQuantity, if ammoCount higher = higher win%		--can be low ammo
-//get difficulty, duration, event and enemyLevel and apply buff or debuff
+function missionStart (mission) {	
 	let EnLvl = 0;
 	let EnQty = 0;
 	let event = 0;
@@ -181,28 +186,44 @@ function MissionAssigmentStart(mission) {
 		if(succesChance >= succesRoll){
 			//Create item chance discovery 
 			mission.state = "finished";
-			Player.playerXp += mission.xp;
-			console.log(Player.playerXp);
+			Player.playerXp += AssignXp(mission.level, mission.difficulty);
+			console.log(mission.xp);
+			console.log("PLAYER XP = ",Player.playerXp);
 			localStorage.setItem("missionList", JSON.stringify(missionList));
 		renderMissionTable(missionList);
+		RenderPlayerStats(Player);
+		RemoveMission(mission);
 		alert("Mission succesfull"); 
 		return true;
 	}else{
 		DealDmgPlayer(mission.level, Player)
-		Player.playerXp += (mission.xp / 2);
-		console.log(Player.playerXp);
+		Player.playerXp += (AssignXp(mission.level, mission.difficulty) / 2);
+		console.log("PLAYER XP = ",Player.playerXp);
 		renderMissionTable(missionList);
+		RenderPlayerStats(Player);
 		//player recieve dmg
 		alert("Mission failed");
 		return false;
 	}
 }
 
+function RemoveMission(mission){
+	if(mission.id > -1){
+		missionList.splice(index, mission.id);
+	}
+}
+
 function AssignXp(level, difficulty){
+	level = Number(level);
+	difficulty = Number(difficulty);
 	switch(difficulty){
-		case 1: return level * 1;
+		case 1: 
+			console.log(level * 1);
+			return level * 1;
 			break;
-		case 2: return level * 2; 
+		case 2: 
+			console.log(level * 2);
+			return level * 2; 
 			break;
 		case 4: return level * 4;
 			break;
@@ -210,9 +231,9 @@ function AssignXp(level, difficulty){
 }
 
 function LevelUp() {
-	if(Player.playerXp >= 100){
+	if(Player.playerXp >= 50){
 		Player.playerLevel =+ 1;
-		Player.playerXp = Player.playerXp - 100;
+		Player.playerXp = Player.playerXp - 50;
 		let levelUp = prompt("Enter skill to level up: Vitality, Agility, Luck");
 		switch(levelUp){
 			case "Vitality": Player.playerVitality += 1;
@@ -233,15 +254,15 @@ function DecideEvent(){
 	let rNumber = CreateRandomNumber(1, 20);
 	switch(rNumber){
 		case 1: 
-			console.log("rain, 1");
+			console.log("EVENT = rain, 1");
 			return "rain";
 			break;
 		case 2:
-			console.log("debris, 2") 
+			console.log("EVENT = debris, 2") 
 			return "debris";
 			break;
 		default: 
-			console.log("nothing,else")
+			console.log("EVENT = nothing,else")
 			return "nothing";
 			break;
 	}
@@ -250,3 +271,35 @@ function DecideEvent(){
 function DealDmgPlayer(missionLevel, Player){
 	return Math.floor(CreateRandomNumber(1,missionLevel) + (Player.playerLevel/Player.playerVitality));
 }
+
+
+function RenderPlayerStats(player) {
+	playerTable.innerHTML = "";
+
+	const row = document.createElement("tr");
+
+	console.log(player);
+		const hpCell = document.createElement("td");
+		const levelCell = document.createElement("td");
+		const xpCell = document.createElement("td");
+		const vitalityCell = document.createElement("td");
+		const agilityCell = document.createElement("td");
+		const luckCell = document.createElement("td");
+		//console.log(player.playerHp);
+		hpCell.textContent = ManagePlayerHP(player);
+		levelCell.textContent = player.playerLevel;
+		xpCell.textContent = player.playerXp;
+		vitalityCell.textContent = player.playerVitality;
+		agilityCell.textContent = player.playerAgility;
+		luckCell.textContent = player.playerLuck;
+		
+		row.appendChild(hpCell);
+		row.appendChild(levelCell);
+		row.appendChild(xpCell);
+		row.appendChild(vitalityCell);
+		row.appendChild(agilityCell);
+		row.appendChild(luckCell);	
+		playerTable.appendChild(row);
+}
+
+RenderPlayerStats(Player);
