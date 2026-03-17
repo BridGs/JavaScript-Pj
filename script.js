@@ -1,5 +1,6 @@
 //Mission data input
 const missionCreateBtn = document.getElementById("createMissionBtn");
+const resetProgressBtn = document.getElementById("resetProgress");
 const missionTitle = document.getElementById("missionTitle");
 const difficulty = document.getElementById("difficulty");
 const missionLevel = document.getElementById("level");
@@ -45,7 +46,6 @@ if(storedPlayer != null){
 	playerHp : ManagePlayerHP,
 	playerAgility : 1,
 	playerLuck : 1,
-	playerAmmoQuantity : "Low"
 }
 }
 
@@ -301,5 +301,20 @@ function RenderPlayerStats(player) {
 		row.appendChild(luckCell);	
 		playerTable.appendChild(row);
 }
+
+resetProgressBtn.addEventListener("click", function(){
+	missionList = [];
+	Player = {
+	playerXp : 0,
+	playerLevel : 1,
+	playerDmg : 0,
+	playerVitality : 1,
+	playerHp : ManagePlayerHP,
+	playerAgility : 1,
+	playerLuck : 1,
+	};
+	renderMissionTable(missionList);
+	RenderPlayerStats(Player);
+})
 
 RenderPlayerStats(Player);
